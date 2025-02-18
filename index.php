@@ -75,6 +75,8 @@
                 </div>
               </form>
 
+              <button id="btn">test</button>
+
         </article>
 
         <!-- <footer>フッター</footer> -->
@@ -84,6 +86,17 @@
 </html>
 
 <?php
+
+    // echo "<script>alert('test');</script>";
+    // echo "
+    // <script>
+    //     window.onload = function() {
+    //         document.getElementById('btn').onclick = function() {
+    //             alert('ボタン押下');
+    //         }
+    //     };
+    // </script>";
+    
 
     // 送信ボタンからの遷移か確認.
     if( isset( $_FILES['uploadfile'] ))
@@ -100,6 +113,41 @@
             if( move_uploaded_file( $_FILES['uploadfile']['tmp_name'], $upName ) )
             {
                 echo "アップロードに成功しました。"; 
+
+                // sftpによる接続およびファイル転送
+                $curl = curl_init();
+                // $file = fopen("curl.txt", "r+");
+                $file = fopen( $upName, "r+" );
+                // $url = "http://192.168.33.10/file/";
+                // $url = "https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/upload_dev/upload/";
+                $url = "https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/resources/";
+                curl_setopt($curl, CURLOPT_URL, $url);
+                curl_setopt($curl, CURLOPT_UPLOAD, 1);
+                curl_setopt($curl, CURLOPT_INFILE, $file);
+                curl_exec($curl);
+                curl_close($curl);
+
+                echo "
+                <script>        
+                    async function LoadFile( url )
+                    {
+                        const response = await fetch(url);
+                        const extension = url.split('.').pop();
+                        
+                        if (extension === 'spz') 
+                        {
+                            alert( 'SPZ' );
+                        } 
+                        else if (extension === 'ply') 
+                        {
+                            alert( 'PLY' );
+                        }
+
+                    }
+
+                    LoadFile( 'https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/resources/uploadtest.ply' );
+                </script>";
+
             }
             else
             {
