@@ -17,14 +17,26 @@
         file_put_contents( $path, $raw );
 
 
-        // ファイルリスト追加.
+        // "https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/exSample.spz";
+        // "https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/upload_dev/upload/uploadfile.spz";
+        $folderPath = "https://vxvcojp.xsrv.jp/sandbox/p/p0168_3dgs/upload_dev/upload/";
+        $spzFilePath = $folderPath.$fileName.$extension;
+
+        
+        // ファイルリストの読込（仮）.
         $fileListPath = "../upload/fileListSamle.json";
+        $readList = file_get_contents( $fileListPath );
+
+
+        // ファイルリスト追加.（Jsonデータとして保管しておく用の想定。現状は仮データをいれて書き出ししているだけ。）
+        // $fileListPath = "../upload/fileListSamle.json";
         $fileListData = "{ \"ID\" : 0, \"Name\" : \"fileName\", \"URL\" : \"http://aaaaaaa\" }";
         // file_put_contents( $path, $fileListData, FILE_APPEND );
         file_put_contents( $fileListPath, $fileListData );
 
 
         // スプレッドシートの値を取得.
+        // JSONやIDはvxvメール（momii.daiji@vxv.co.jp）のaccountで作成したスプレッドシート、またGCPのモノなので変更が必要です.
         $sheet_name = "sheet1";
         $sheet_range = "A2:C4";
         $client = new Google\Client();
@@ -34,6 +46,7 @@
         $spreadsheet_id = '1UdrhpwZle0wq8S7lrJhZGWpm6mI3qMDfOSTVmt6QQ0U';
 
 
+        // 返答用のJson形式文字列の作成.
         // $response = $service->spreadsheets->get($spreadsheet_id);
         // $response = $service->spreadsheets->get($spreadsheet_id, $sheet_name.'!'.$sheet_range);
         $response = $service->spreadsheets_values->get($spreadsheet_id, $sheet_name.'!'.$sheet_range);
@@ -41,8 +54,9 @@
         // $sheet = $response->getSheets()[0];        
         $rows = $response->getValues();
         $log = ">> ";
-        $param = "\"Response\" : { \"ID\": 0, \"Result\": \"Success\", \"Path\": \"".$path."\" },";
-        $data = "{ ".$param." \"Data\" : [ ";
+        $param = "\"Response\" : { \"ID\": 0, \"Result\": \"Success\", \"Path\": \"".$path."\", \"Log\" : \"---\" },";
+        $listStr = "\"FileList\" : { \"ID\": 0, \"Name\": \".$fileName.$extension.\", \"URL\": \"".$spzFilePath."\" },";
+        $data = "{ ".$param.$listStr." \"Data\" : [ ";
         $outIndex = 0;
         foreach ( $rows as $i => $row ) 
         {
@@ -64,7 +78,7 @@
         }
 
 
-        // スプレッドシートに値を追加.
+        // スプレッドシートに値を追加（値の追加テスト。データ形式が未定のため現状追加データは適当。）.
         $addData = new Google_Service_Sheets_ValueRange(
             [
                 'values' => 
